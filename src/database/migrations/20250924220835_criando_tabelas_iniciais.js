@@ -2,21 +2,27 @@
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export function up(knex) {
-  return knex.schema
-    .createTable('marcas', (table) => {
-        table.increments('id').primary();
-        table.string('nome', 100).notNullable();
-        table.string('site', 100);
-        table.string('telefone', 15);
-    });
+export async function up(knex) {
+  const hasMarcas = await knex.schema.hasTable('marcas')
+  if (!hasMarcas) {
+    return knex.schema.createTable('marcas', (table) => {
+      table.increments('id').primary()
+      table.string('nome', 100).notNullable()
+      table.string('site', 100)
+      table.string('telefone', 15)
+    })
+  }
+  // No-op if table already exists (idempotent)
 }
 
 /**
  * @param { import("knex").Knex } knex
  * @returns { Promise<void> }
  */
-export function down(knex) {
-  return knex.schema
-    .dropTable('marcas');
+export async function down(knex) {
+  const hasMarcas = await knex.schema.hasTable('marcas')
+  if (hasMarcas) {
+    return knex.schema.dropTable('marcas')
+  }
+  // No-op if table does not exist
 }
